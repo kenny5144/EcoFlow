@@ -292,3 +292,207 @@ export default function Landing() {
     </div>
   );
 }
+
+
+
+feranmi
+
+
+import React, { useState } from 'react';
+import { User, Bell, Moon, Shield, Save, Camera } from 'lucide-react';
+import type { User as UserType } from '../types';
+
+export default function Profile() {
+  // Mock user data - in production, this would come from your backend
+  const [user, setUser] = useState<UserType>({
+    id: '1',
+    name: 'Alex Johnson',
+    email: 'alex@example.com',
+    preferences: {
+      notifications: true,
+      darkMode: false,
+    },
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user.name,
+    email: user.email,
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setUser(prev => ({
+      ...prev,
+      ...formData,
+    }));
+    setIsEditing(false);
+  };
+
+  const togglePreference = (key: keyof UserType['preferences']) => {
+    setUser(prev => ({
+      ...prev,
+      preferences: {
+        ...prev.preferences,
+        [key]: !prev.preferences[key],
+      },
+    }));
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        {/* Profile Header */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-8 sm:px-8">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center">
+                <User className="w-12 h-12 text-white" />
+              </div>
+              <button className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50">
+                <Camera className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">{user.name}</h1>
+              <p className="text-green-100">{user.email}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 sm:p-8 space-y-8">
+          {/* Profile Information */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile Information</h2>
+            {isEditing ? (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Name</p>
+                    <p className="text-gray-900">{user.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="text-gray-900">{user.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  Edit Profile
+                </button>
+              </div>
+            )}
+          </section>
+
+          {/* Preferences */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Preferences</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Bell className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <p className="font-medium text-gray-900">Notifications</p>
+                    <p className="text-sm text-gray-500">Receive updates about your product searches</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => togglePreference('notifications')}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                    user.preferences.notifications ? 'bg-green-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      user.preferences.notifications ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Moon className="w-5 h-5 text-gray-600" />
+                  <div>
+                    <p className="font-medium text-gray-900">Dark Mode</p>
+                    <p className="text-sm text-gray-500">Switch to dark theme</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => togglePreference('darkMode')}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                    user.preferences.darkMode ? 'bg-green-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      user.preferences.darkMode ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Security */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Security</h2>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-center space-x-3 mb-4">
+                <Shield className="w-5 h-5 text-gray-600" />
+                <div>
+                  <p className="font-medium text-gray-900">Password</p>
+                  <p className="text-sm text-gray-500">Last changed 3 months ago</p>
+                </div>
+              </div>
+              <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                Change Password
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
