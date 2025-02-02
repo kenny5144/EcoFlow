@@ -1,8 +1,19 @@
 import React from 'react'
-
-const page = () => {
+import { auth } from '../lib/auth'
+import { redirect } from 'next/navigation'
+import SignOut from '../Component/sign-out'
+const page = async () => {
+    const session = await auth()
+    if (!session) redirect("/Signin")
   return (
-    <div>page</div>
+    <>
+      <div className="bg-gray-100 rounded-lg p-4 text-center mb-6">
+        <p className="text-gray-600">Signed in as:{session.user.email}</p>
+        <p className="font-medium">ei</p>
+      </div>
+
+      <SignOut />
+    </>
   )
 }
 
