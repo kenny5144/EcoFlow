@@ -2,9 +2,9 @@
 import React from "react";
 import Link from "next/link";
 
-import { Leaf, Home, History, User, LogIn } from "lucide-react";
+import { Leaf, Home, History,Upload, User, LogIn } from "lucide-react";
 import { useRouter } from "next/router";
-const NavbarComponent = () => {
+const NavbarComponent = ({session}) => {
   const location = useRouter;
 
   return (
@@ -22,7 +22,7 @@ const NavbarComponent = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Link
-                href="/Landing"
+                href="/"
                 className={`nav-link ${
                   location.pathname === "/" ? "text-green-600" : "text-gray-600"
                 }`}
@@ -30,13 +30,36 @@ const NavbarComponent = () => {
                 <Home className="h-5 w-5" />
                 <span>Home</span>
               </Link>
+              {session? 
+              <>
+              
+              
+              <Link
+                href="/Homepage"
+                className={`nav-link ${
+                  location.pathname === "/Homepage" ? "text-green-600" : "text-gray-600"
+                }`}
+              >
+                <Upload className="h-5 w-5" />
+                <span>Upload</span>
+              </Link>
+              </>:""}
 
               <Link
                 href="/Signin"
                 className="flex items-center space-x-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
-                <LogIn className="h-5 w-5" />
-                <span>Login</span>
+               {session ? (
+  <>
+  <LogIn className="h-5 w-5" />
+  <span>Signout</span>
+  </>
+) : (
+  <>
+    <LogIn className="h-5 w-5" />
+    <span>Login</span>
+  </>
+)}
               </Link>
             </div>
           </div>

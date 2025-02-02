@@ -60,7 +60,9 @@ const Home = ({ session }) => {
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
         console.log(data);
+
         setAnalysis(data);
+
       } else {
         const text = await response.text();
         console.error("Unexpected response (Not JSON):", text);
@@ -72,6 +74,9 @@ const Home = ({ session }) => {
     } finally {
       setLoading(false);
     }
+    
+
+    
   };
 
   const handleRemoveFile = (index) => {

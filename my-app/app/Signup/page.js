@@ -90,7 +90,7 @@ export default function signup() {
           </div>
 
           <Link
-            href="/signin"
+            href="/Signin"
             className="mt-4 w-full flex justify-center py-2 px-4 border border-green-600 rounded-md shadow-sm text-sm font-medium text-green-600 bg-white hover:bg-green-50"
           >
             Login
