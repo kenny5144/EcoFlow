@@ -5,7 +5,7 @@ const Nav = async () => {
   const session = await auth();
   return (
     <>
-      <NavbarComponent />
+      <NavbarComponent session={session} />
     </>
   );
 };

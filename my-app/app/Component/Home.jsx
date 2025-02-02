@@ -37,6 +37,8 @@ const Home = ({ session }) => {
 
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
+        console.log(data);
+    console.log(data.rating);
         console.log("Upload success:", data);
         setAnalysis(data); // Store response in state
       } else {
@@ -50,6 +52,9 @@ const Home = ({ session }) => {
     } finally {
       setLoading(false);
     }
+    
+
+    
   };
 
   return (
