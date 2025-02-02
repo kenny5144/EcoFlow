@@ -43,7 +43,7 @@ export async function POST(req) {
         Authorization: `Bearer ${process.env.OPENAI_KEY}`, // Ensure API key is set
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o", // Ensure you're using the correct model
         messages: [
           {
             role: "user",
@@ -70,7 +70,7 @@ export async function POST(req) {
               },
               {
                 type: "text",
-                text: "For `recommendation`, provide at least 3 alternative eco-friendly products with brand names and model names. Example: { 'recommendation': [ { 'brand': 'Bamboo Earth', 'product': 'Biodegradable Toothbrush' }, { 'brand': 'Seventh Generation', 'product': 'Plant-Based Laundry Detergent' } ] }",
+                text: "For `recommendation`, provide at least 3 alternative eco-friendly products with brand names and model names.",
               },
               ...base64Files.map((file) => ({
                 type: "image_url",
@@ -89,16 +89,29 @@ export async function POST(req) {
     // Parse and return structured response
     const data = await response.json();
 
+    // Check if the response contains the expected data structure
     if (!response.ok) {
-      throw new Error(
-        `OpenAI API Error: ${data.error?.message || "Unknown error"}`
-      );
+      throw new Error(`OpenAI API Error: ${data.error?.message || "Unknown error"}`);
     }
 
-    return new Response(JSON.stringify(data.choices[0].message.content), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    // Ensure the content is a valid JSON response
+    const content = data.choices && data.choices[0] && data.choices[0].message.content;
+    if (content) {
+      try {
+        // Parse content into JSON if it's a valid JSON string
+        const parsedContent = JSON.parse(content);
+        
+        // Return the parsed JSON response
+        return new Response(JSON.stringify(parsedContent), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err) {
+        throw new Error("Failed to parse OpenAI response as JSON.");
+      }
+    } else {
+      throw new Error("Invalid response structure from OpenAI API.");
+    }
   } catch (error) {
     console.error("OpenAI API Error:", error);
     return new Response(JSON.stringify({ error: "Failed to process images" }), {
