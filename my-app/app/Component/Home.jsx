@@ -1,11 +1,33 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image"; // Import Image from Next.js
+import { FiUploadCloud } from "react-icons/fi";
+import { FaTimes as X } from 'react-icons/fa';  // Importing the X icon (cross) from react-icons
 
 const Home = ({ session }) => {
   const [files, setFiles] = useState([]);
   const [analysis, setAnalysis] = useState(null); // Stores AI response
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    console.log("Analysis updated:", analysis);
+  }, [analysis]);
+
+  const handleFileChange = (e) => {
+    setFiles((prevFiles) => [...prevFiles, ...Array.from(e.target.files)]);
+  };
+  
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFiles = e.dataTransfer.files;
+    setFiles([...droppedFiles]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,8 +59,8 @@ const Home = ({ session }) => {
 
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
-        console.log("Upload success:", data);
-        setAnalysis(data); // Store response in state
+        console.log(data);
+        setAnalysis(data);
       } else {
         const text = await response.text();
         console.error("Unexpected response (Not JSON):", text);
@@ -52,45 +74,123 @@ const Home = ({ session }) => {
     }
   };
 
+  const handleRemoveFile = (index) => {
+    setFiles(files.filter((_, i) => i !== index)); // Remove specific file by index
+  };
+
   return (
-    <>
-      <div className="bg-gray-100 rounded-lg p-4 text-center mb-6">
-        <p className="text-gray-600">Signed in as: {session.user.email}</p>
+    <div className="grid md:grid-cols-2 gap-8 mt-16">
+      {/* Left side - Upload and Preview */}
+      <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
+        <form onSubmit={handleSubmit}>
+          <div
+            className="border-2 border-dashed border-[#86efac] rounded-lg p-8 text-center"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <div className="mx-auto w-12 h-12 bg-[#dcfce7] rounded-full flex items-center justify-center mb-4">
+              <FiUploadCloud className="w-6 h-6 text-[#16a34a]" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Easy Upload</h3>
+            <p className="text-gray-600 mb-4">Simply upload or drag & drop up to two images to get started</p>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+              id="file-upload"
+            />
+            <label
+              htmlFor="file-upload"
+              className="inline-flex items-center justify-center px-4 py-2 bg-[#16a34a] text-white rounded-md hover:bg-[#15803d] cursor-pointer"
+            >
+              Choose Files
+            </label>
+          </div>
+
+          {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
+
+          {files.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-4">Selected Files</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {files.map((file, index) => (
+                  <div key={index} className="relative w-40 h-42 rounded-lg overflow-hidden bg-gray-100">
+                  <Image
+                    src={URL.createObjectURL(file) || "/placeholder.svg"}
+                    alt={`Uploaded image ${index + 1}`}
+                    layout="responsive" // Ensures the image adapts to the container's size
+                    width={128} // Width of the image
+                    height={128} // Height of the image
+                    className="object-cover"
+                  />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(index)} // Call remove handler
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6">
+            <button
+              type="submit"
+              className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || files.length === 0}
+            >
+              {loading ? "Analyzing..." : "Analyze Images"}
+            </button>
+          </div>
+        </form>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input
-          type="file"
-          name="images"
-          multiple
-          accept="image/*"
-          onChange={(e) => setFiles(Array.from(e.target.files))}
-          className="border p-2"
-        />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-          {loading ? "Uploading..." : "Upload"}
-        </button>
-      </form>
+      {/* Right side - Analysis Results */}
+      <div className="bg-white p-8 rounded-lg shadow-sm">
+        <h2 className="text-2xl font-semibold mb-6">Analysis Results</h2>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#16a34a] mx-auto"></div>
+            <p className="mt-4 text-gray-600">Analyzing your images...</p>
+          </div>
+        ) : analysis ? (
+          <div className="space-y-6">
+            <div>
+            <div className="flex items-center gap-2 mb-6">
+  <span className="text-5xl font-extrabold text-[#16a34a] shadow-md p-2 rounded-full bg-[#d1fae5]">{analysis.rating}</span>
+  <span className="text-xl font-semibold text-gray-600">/10</span>
+</div>
 
-      {error && <p className="text-red-500 mt-4">{error}</p>}
+              <p className="text-gray-700">{analysis.reasoning}</p>
+            </div>
 
-      {analysis && (
-        <div className="mt-6 p-4 border rounded bg-gray-50">
-          <h2 className="text-lg font-semibold">Analysis Result</h2>
-          <p>
-            <strong>Rating:</strong> {analysis.rating}/10
-          </p>
-          <p>
-            <strong>Reasoning:</strong> {analysis.reasoning}
-          </p>
-          {analysis.recommendation && (
-            <p>
-              <strong>Recommendation:</strong> {analysis.recommendation}
-            </p>
-          )}
+            {analysis.recommendation && Array.isArray(analysis.recommendation) && (
+  <div>
+    <h3 className="font-semibold text-lg mb-3">Eco-friendly Alternatives</h3>
+    <div className="space-y-3">
+      {analysis.recommendation.map((item, index) => (
+        <div key={index} className="p-4 bg-[#f0fdf4] rounded-lg">
+          <p className="font-semibold text-[#16a34a]">{item.brand}</p>
+          <p className="text-gray-600">{item.product}</p>
         </div>
-      )}
-    </>
+      ))}
+    </div>
+  </div>
+)}
+
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <p>Upload and analyze images to see results</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
