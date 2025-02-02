@@ -21,7 +21,10 @@ export default async function page() {
           <p className="mt-2 text-gray-600">
             
            'Sign in to continue your eco-friendly journey' 
+
           </p>
+          <p> Test email:  ojok761@gmail.com</p>
+          <p>Test password: $Ktheman123</p>
         </div>
 
   <GithubSignIn/>
@@ -57,6 +60,7 @@ export default async function page() {
                   id="email"
                   name="email"
                   type="email"
+                  defaultValue='ojok761@gmail.com'
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
                 />
@@ -73,6 +77,7 @@ export default async function page() {
                   id="password"
                   name="password"
                   type="password"
+                  defaultValue="$Ktheman123"
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
                 />
