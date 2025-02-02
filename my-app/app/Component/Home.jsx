@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image"; // Import Image from Next.js
+import Image from "next/image"; 
+import { X } from "lucide-react";
 import { FiUploadCloud } from "react-icons/fi";
-import { FaTimes as X } from 'react-icons/fa';  // Importing the X icon (cross) from react-icons
 
 const Home = ({ session }) => {
   const [files, setFiles] = useState([]);
-  const [analysis, setAnalysis] = useState(null); // Stores AI response
+  const [analysis, setAnalysis] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -80,12 +80,11 @@ const Home = ({ session }) => {
   };
 
   const handleRemoveFile = (index) => {
-    setFiles(files.filter((_, i) => i !== index)); // Remove specific file by index
+    setFiles(files.filter((_, i) => i !== index));
   };
 
   return (
     <div className="grid md:grid-cols-2 gap-8 mt-16">
-      {/* Left side - Upload and Preview */}
       <div className="space-y-6 bg-white p-8 rounded-lg shadow-sm">
         <form onSubmit={handleSubmit}>
           <div
@@ -155,7 +154,6 @@ const Home = ({ session }) => {
         </form>
       </div>
 
-      {/* Right side - Analysis Results */}
       <div className="bg-white p-8 rounded-lg shadow-sm">
         <h2 className="text-2xl font-semibold mb-6">Analysis Results</h2>
         {loading ? (
