@@ -1,86 +1,109 @@
-// pages/api/openai-upload.js
-import { OpenAI } from 'openai';
-import Busboy from 'busboy';
+import { OpenAI } from "openai";
 
-export const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  };
-
-export const config = {
-  api: {
-    bodyParser: false, 
-  },
-};
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const busboy = Busboy({ headers: req.headers });
-  console.log(busboy)
-  const files = [];
-  console.log(files)
-
-  // Process uploaded files in memory
-  busboy.on('file', (name, file, info) => {
-    const { mimeType } = info;
-    const chunks = [];
-
-    file.on('data', (chunk) => chunks.push(chunk));
-    file.on('end', () => {
-      // Convert buffer to base64 for OpenAI
-      const buffer = Buffer.concat(chunks);
-      const base64 = buffer.toString('base64');
-      files.push({ mimeType, base64 });
-    });
-  });
-
-  // Send files to OpenAI after processing
-  busboy.on('finish', async () => {
-    try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, // Ensure this is defined in .env.local
-        },
-        body: JSON.stringify({
-          model: "gpt-4o", // Use correct model name
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "text", text: "Describe these images:" },
-                ...files.map((file) => ({
-                  type: "image_url",
-                  image_url: {
-                    url: `data:${file.mimeType};base64,${file.base64}`,
-                  },
-                })),
-              ],
-            },
-          ],
-          max_tokens: 300,
+export async function POST(req) {
+  try {
+    // Ensure the request contains form data
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("multipart/form-data")) {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid Content-Type, expected multipart/form-data",
         }),
-      });
-  
-      // Parse JSON response
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(`OpenAI API Error: ${data.error?.message || "Unknown error"}`);
-      }
-  
-      res.status(200).json({ result: data.choices[0].message.content });
-    } catch (error) {
-      console.error("OpenAI API Error:", error);
-      res.status(500).json({ error: "Failed to process images" });
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
-  });
-  
 
-  req.pipe(busboy); 
+    // Get form data from request
+    const formData = await req.formData();
+    const files = formData.getAll("images");
+
+    if (!files || files.length === 0) {
+      return new Response(JSON.stringify({ error: "No files uploaded" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Convert each file to base64 for OpenAI API
+    const base64Files = await Promise.all(
+      files.map(async (file) => {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        return {
+          mimeType: file.type,
+          base64: buffer.toString("base64"),
+        };
+      })
+    );
+
+    // Send images to OpenAI API with structured prompt
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_KEY}`, // Ensure API key is set
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Analyze the environmental impact of the product in this image and return a structured JSON response with the following fields:",
+              },
+              {
+                type: "text",
+                text: "1. `rating`: A number from 1 to 10 (1 = very harmful, 10 = very eco-friendly).",
+              },
+              {
+                type: "text",
+                text: "2. `reasoning`: Explain why the product received this rating, listing specific ingredients or materials.",
+              },
+              {
+                type: "text",
+                text: "3. `recommendation`: If the rating is 5 or lower, suggest specific alternative products with **brand names and model names** that are better for the environment.",
+              },
+              {
+                type: "text",
+                text: "Ensure the response is **valid JSON format** with keys: `rating`, `reasoning`, and `recommendation`.",
+              },
+              {
+                type: "text",
+                text: "For `recommendation`, provide at least 3 alternative eco-friendly products with brand names and model names. Example: { 'recommendation': [ { 'brand': 'Bamboo Earth', 'product': 'Biodegradable Toothbrush' }, { 'brand': 'Seventh Generation', 'product': 'Plant-Based Laundry Detergent' } ] }",
+              },
+              ...base64Files.map((file) => ({
+                type: "image_url",
+                image_url: {
+                  url: `data:${file.mimeType};base64,${file.base64}`,
+                },
+              })),
+            ],
+          },
+        ],
+        max_tokens: 500,
+        response_format: { type: "json_object" }, // ✅ Correct format
+      }),
+    });
+
+    // Parse and return structured response
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        `OpenAI API Error: ${data.error?.message || "Unknown error"}`
+      );
+    }
+
+    return new Response(JSON.stringify(data.choices[0].message.content), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("OpenAI API Error:", error);
+    return new Response(JSON.stringify({ error: "Failed to process images" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
