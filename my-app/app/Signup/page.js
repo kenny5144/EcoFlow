@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight,Eye,EyeOff } from 'lucide-react';
 
 export default function signup() {
   const [isLogin, setIsLogin] = useState(true);
