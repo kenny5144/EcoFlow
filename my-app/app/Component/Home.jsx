@@ -124,14 +124,14 @@ const Home = ({ session }) => {
                   <Image
                     src={URL.createObjectURL(file) || "/placeholder.svg"}
                     alt={`Uploaded image ${index + 1}`}
-                    layout="responsive" // Ensures the image adapts to the container's size
-                    width={128} // Width of the image
-                    height={128} // Height of the image
+                    layout="responsive" 
+                    width={128}
+                    height={128} 
                     className="object-cover"
                   />
                     <button
                       type="button"
-                      onClick={() => handleRemoveFile(index)} // Call remove handler
+                      onClick={() => handleRemoveFile(index)} 
                       className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                     >
                       <X className="w-4 h-4" />
