@@ -1,14 +1,19 @@
 import Link from 'next/link';
-import { auth, signIn } from '../lib/auth';
+import { useSession, signIn } from "next-auth/react";
 import { Mail, Lock, ArrowRight,Eye,EyeOff } from 'lucide-react';
 import { GithubSignIn } from '../Component/github-sign-in';
 import { redirect } from 'next/navigation';
 import { executeAction } from "../lib/executeAction";
-export default async function page() {
+export default function SignIn() {
+  const { data: session } = useSession();
+  const router = useRouter();
 
+  useEffect(() => {
+    if (session) {
+      router.push("/Homepage");
+    }
+  }, [session, router]);
 
-  const session= await auth();
-  if (session) redirect("/Homepage")
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
@@ -23,11 +28,9 @@ export default async function page() {
            'Sign in to continue your eco-friendly journey' 
 
           </p>
-          <p> Test email:  ojok761@gmail.com</p>
-          <p>Test password: $Ktheman123</p>
+         
         </div>
 
-  <GithubSignIn/>
         <form className="mt-8 space-y-6"
         action={async (formData)=>{
           "use server"
@@ -60,7 +63,7 @@ export default async function page() {
                   id="email"
                   name="email"
                   type="email"
-                  defaultValue='ojok761@gmail.com'
+                 // defaultValue='ojok761@gmail.com'
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
                 />
@@ -77,7 +80,7 @@ export default async function page() {
                   id="password"
                   name="password"
                   type="password"
-                  defaultValue="$Ktheman123"
+               //   defaultValue="$Ktheman123"
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500"
                 />

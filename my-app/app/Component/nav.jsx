@@ -1,13 +1,10 @@
-import SignOut from "../Component/sign-out";
-import { auth } from "../lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 import NavbarComponent from "./navbarComponent";
+
 const Nav = async () => {
-  const session = await auth();
-  return (
-    <>
-      <NavbarComponent session={session} />
-    </>
-  );
+  const session = await getServerSession(authOptions); // v4 function
+  return <NavbarComponent session={session} />;
 };
 
 export default Nav;

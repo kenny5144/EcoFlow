@@ -1,23 +1,31 @@
-// auth.ts
-import NextAuth from "next-auth"
-import GitHub from "next-auth/providers/github"
-import Credentials from "next-auth/providers/credentials";
-export const { auth, handlers, signIn } = NextAuth({ providers: [GitHub, Credentials({
-    credentials:{
-        email:{},
-        password:{},
-        
-    },
-    authorize: async (credentials) => {
-       
-        const email = "ojok761@gmail.com"
-        const password="$Ktheman123"
-        if (credentials.email===email && credentials.password===password){
-            return{email, password}
-        }else{
-          throw new Error("Invalid credentials.");
-        }
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
+export const authOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
-})] })
- 
+      async authorize(credentials) {
+        // Replace with your "hardcoded" user for now
+        if (
+          credentials.email === "enekebe12@gmail.com" &&
+          credentials.password === "Obianuju"
+        ) {
+          return { email: credentials.email };
+        }
+        return null; // invalid credentials
+      },
+    }),
+  ],
+  session: { strategy: "jwt" }, // server-side session
+  pages: {
+    signIn: "/Signin", // custom sign-in page
+  },
+};
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
